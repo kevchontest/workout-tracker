@@ -160,62 +160,8 @@ export default function MobileWorkoutApp() {
   const [selectedDay, setSelectedDay] = useState(new Date().toLocaleString('en-US', { weekday: 'long' }));
 const filteredWorkouts = workouts.filter(w => w.day === selectedDay);
 
+  const [selectedDay, setSelectedDay] = useState(new Date().toLocaleString('en-US', { weekday: 'long' }));
+const filteredWorkouts = workouts.filter(w => w.day === selectedDay);
+
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>}>: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
-      
-        <div>
-                    <h1 style={{ textAlign: "center" }}>{selectedDay} Workout</h1>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <label>Choose Day: </label>
-            <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
-              {workouts.map(w => <option key={w.day} value={w.day}>{w.day}</option>)}
-            </select>
-          </div>
-          <div style={{ marginBottom: 20 }}>
-            <label>Rest Timer (seconds): </label>
-            <input
-              type="number"
-              value={restTime}
-              onChange={(e) => setRestTime(Number(e.target.value))}
-              style={{ width: 60, backgroundColor: '#1e1e1e', color: '#f0f0f0', border: '1px solid #444' }}
-            />
-          </div>
-          
-{filteredWorkouts.map((w, wi) => ( ... ));
-                return (
-                  <div key={ei} style={{ marginBottom: 20, paddingLeft: 10 }}>
-                    <strong>{ex}</strong>
-                    <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
-                      <input id={`${key}-weight`} placeholder="Weight (lbs)" type="number" style={{ width: 100, backgroundColor: '#1e1e1e', color: '#f0f0f0', border: '1px solid #444' }} />
-                      <input id={`${key}-reps`} placeholder="Reps" type="number" style={{ width: 60 }} />
-                      <button onClick={() => {
-                        const wVal = document.getElementById(`${key}-weight`).value;
-                        const rVal = document.getElementById(`${key}-reps`).value;
-                        handleLog(w.day, ex, wVal, rVal);
-                      }}>Log Set</button>
-                    </div>
-                    {lastWeight && <p style={{ fontSize: "0.8em", color: "gray" }}>Suggested next weight: {lastWeight} lbs</p>}
-                    {chartData.length > 1 && (
-                      <ResponsiveContainer width="100%" height={150}>
-                        <LineChart data={chartData}>
-                          <XAxis dataKey="session" hide />
-                          <YAxis domain={['auto', 'auto']} width={30} />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="weight" stroke="#8884d8" strokeWidth={2} dot />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                );
-              })}
-              <button onClick={() => finishWorkout(w.day)} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '6px 12px', marginTop: 10, border: 'none', borderRadius: '4px' }}>Finish Workout</button>
-            </div>
-          ))}
-          {timeLeft > 0 && (
-            <p style={{ textAlign: "center", color: "red" }}>Rest Timer: {timeLeft}s</p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+    <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
