@@ -155,8 +155,11 @@ export default function MobileWorkoutApp() {
     URL.revokeObjectURL(url);
   };
 
+  const [selectedDay, setSelectedDay] = useState(new Date().toLocaleString('en-US', { weekday: 'long' }));
+const filteredWorkouts = workouts.filter(w => w.day === selectedDay);
+
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
+    <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
       
         <div>
                     <h1 style={{ textAlign: "center" }}>{selectedDay} Workout</h1>
