@@ -6,55 +6,65 @@ const defaultWorkouts = [
     day: "Monday",
     focus: "Upper Body (Push/Pull)",
     exercises: [
-      "Barbell Bench Press",
-      "Barbell Row",
-      "Superset: Overhead Press + Pull-Ups",
-      "Superset: Hammer Curls + Triceps Extensions"
+      { name: "Barbell Bench Press", sets: 3, reps: "6–8" },
+      { name: "Barbell Row", sets: 3, reps: "6–8" },
+      { name: "Seated DB Overhead Press", sets: 3, reps: "8–12" },
+      { name: "Pull-Ups", sets: 3, reps: "6–10" },
+      { name: "Hammer Curls", sets: 3, reps: "10–15" },
+      { name: "Triceps Extensions", sets: 3, reps: "10–15" },
+      { name: "Lateral Raises", sets: 3, reps: "12–15" }
     ]
   },
   {
     day: "Tuesday",
     focus: "Lower Body (Squat Focus)",
     exercises: [
-      "Barbell Back Squat",
-      "Romanian Deadlift",
-      "Superset: Bulgarian Split Squat + Planks"
+      { name: "Barbell Back Squat", sets: 4, reps: "5–6" },
+      { name: "Romanian Deadlift", sets: 3, reps: "8–10" },
+      { name: "Bulgarian Split Squat", sets: 3, reps: "10–12" },
+      { name: "Planks", sets: 3, reps: "45 sec" },
+      { name: "Side Plank Dips", sets: 3, reps: "10–12/side" }
     ]
   },
   {
     day: "Wednesday",
     focus: "Recovery / Optional Cardio",
     exercises: [
-      "30–45 min Zone 2 Treadmill Walk",
-      "Mobility/Yoga"
+      { name: "Zone 2 Treadmill Walk", sets: 1, reps: "30–45 min" },
+      { name: "Mobility/Yoga", sets: 1, reps: "20–30 min" }
     ]
   },
   {
     day: "Thursday",
     focus: "Upper Body (Hypertrophy/Volume)",
     exercises: [
-      "Incline Press",
-      "Superset: DB Rows + Seated DB Press",
-      "Superset: Lateral Raises + Push-Ups",
-      "Superset: EZ Curls + Overhead Triceps"
+      { name: "Incline Press", sets: 3, reps: "8–10" },
+      { name: "DB Rows", sets: 3, reps: "8–10" },
+      { name: "Seated DB Press", sets: 3, reps: "10–12" },
+      { name: "Lateral Raises", sets: 3, reps: "12–15" },
+      { name: "Rear Delt Flys", sets: 3, reps: "12–15" },
+      { name: "EZ Curls", sets: 3, reps: "10–12" },
+      { name: "Overhead Triceps Extensions", sets: 3, reps: "10–12" }
     ]
   },
   {
     day: "Friday",
     focus: "Lower Body (Hinge/Unilateral)",
     exercises: [
-      "Deadlift",
-      "Front Squat",
-      "Superset: Step-Ups + Hanging Leg Raise"
+      { name: "Deadlift", sets: 4, reps: "3–5" },
+      { name: "Front Squat", sets: 3, reps: "6–8" },
+      { name: "Step-Ups", sets: 3, reps: "10–12" },
+      { name: "Hanging Leg Raise", sets: 3, reps: "12–15" },
+      { name: "Side Plank Dips", sets: 3, reps: "10–12/side" }
     ]
   },
   {
     day: "Saturday",
     focus: "Murph Prep Conditioning",
     exercises: [
-      "1 Mile Run",
-      "10 Rounds: 5 Pull-Ups, 10 Push-Ups, 15 Air Squats",
-      "20-min EMOM: Pull-Ups, Push-Ups, Air Squats"
+      { name: "1 Mile Run", sets: 1, reps: "--" },
+      { name: "10 Rounds: 5 Pull-Ups, 10 Push-Ups, 15 Air Squats", sets: 10, reps: "--" },
+      { name: "20-min EMOM: Pull-Ups, Push-Ups, Air Squats", sets: 1, reps: "20 min" }
     ]
   }
 ];
@@ -82,8 +92,21 @@ export default function MobileWorkoutApp() {
   const [recs, setRecs] = useState({});
   const [restTime, setRestTime] = useState(60);
   const [timeLeft, startTimer] = useTimer(restTime);
-  const [workouts, setWorkouts] = useState(defaultWorkouts);
+  const [workouts, setWorkouts] = useState(() => {
+    const saved = localStorage.getItem("savedProgram");
+    return saved ? JSON.parse(saved) : defaultWorkouts;
+  });
+  const [savedPrograms, setSavedPrograms] = useState(() => {
+    const saved = localStorage.getItem("programs");
+    return saved ? JSON.parse(saved) : { "My Program": defaultWorkouts };
+  });
+  const [programName, setProgramName] = useState("My Program");
   const [searchTerm, setSearchTerm] = useState("");
+  const [completedWorkouts, setCompletedWorkouts] = useState(() => {
+    const saved = localStorage.getItem("completedWorkouts");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [activeScreen, setActiveScreen] = useState("home");
 
   useEffect(() => {
     if (Notification.permission !== "granted") {
@@ -101,58 +124,112 @@ export default function MobileWorkoutApp() {
     startTimer(restTime);
   };
 
+  const finishWorkout = (day) => {
+    const date = new Date().toLocaleString();
+    const newEntry = { date, program: programName, day };
+    const updated = [...completedWorkouts, newEntry];
+    setCompletedWorkouts(updated);
+    localStorage.setItem("completedWorkouts", JSON.stringify(updated));
+    alert(`Workout for ${day} logged.`);
+  };
+
+  const loadProgram = (name) => {
+    const selected = savedPrograms[name];
+    setProgramName(name);
+    setWorkouts(selected);
+    setActiveScreen("workout");
+  };
+
+  const exportWorkoutLog = () => {
+    const csvRows = ["Date,Program,Day"];
+    completedWorkouts.forEach(entry => {
+      csvRows.push(`${entry.date},${entry.program},${entry.day}`);
+    });
+    const csv = csvRows.join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "workout_log.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>Workout Tracker</h1>
-
-      <div style={{ marginBottom: 20 }}>
-        <label>Rest Timer (seconds): </label>
-        <input
-          type="number"
-          value={restTime}
-          onChange={(e) => setRestTime(Number(e.target.value))}
-          style={{ width: 60 }}
-        />
-      </div>
-
-      {workouts.map((w, wi) => (
-        <div key={wi} style={{ marginBottom: 40 }}>
-          <h2>{w.day} – {w.focus}</h2>
-          {w.exercises.map((ex, ei) => {
-            const key = `${w.day}-${ex}`;
-            const lastWeight = recs[key] || "";
-            const chartData = (log[key] || []).map((entry, idx) => ({ session: idx + 1, weight: entry.weight }));
-            return (
-              <div key={ei} style={{ marginBottom: 20, paddingLeft: 10 }}>
-                <strong>{ex}</strong>
-                <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
-                  <input id={`${key}-weight`} placeholder="Weight (lbs)" type="number" style={{ width: 100 }} />
-                  <input id={`${key}-reps`} placeholder="Reps" type="number" style={{ width: 60 }} />
-                  <button onClick={() => {
-                    const wVal = document.getElementById(`${key}-weight`).value;
-                    const rVal = document.getElementById(`${key}-reps`).value;
-                    handleLog(w.day, ex, wVal, rVal);
-                  }}>Log Set</button>
-                </div>
-                {lastWeight && <p style={{ fontSize: "0.8em", color: "gray" }}>Suggested next weight: {lastWeight} lbs</p>}
-                {chartData.length > 1 && (
-                  <ResponsiveContainer width="100%" height={150}>
-                    <LineChart data={chartData}>
-                      <XAxis dataKey="session" hide />
-                      <YAxis domain={['auto', 'auto']} width={30} />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="weight" stroke="#8884d8" strokeWidth={2} dot />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            );
-          })}
+    <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
+      {activeScreen === "home" ? (
+        <div>
+          <h1 style={{ textAlign: "center", color: '#f0f0f0' }}>Workout Programs</h1>
+          <ul>
+            {Object.keys(savedPrograms).map((name) => (
+              <li key={name} style={{ marginBottom: 10, listStyle: 'none' }}>
+                <button onClick={() => loadProgram(name)} style={{ padding: 10, backgroundColor: '#333', color: '#f0f0f0', border: '1px solid #555' }}>{name}</button>
+              </li>
+            ))}
+          </ul>
+          <button onClick={exportWorkoutLog} style={{ marginTop: 20, backgroundColor: '#333', color: '#f0f0f0', padding: '8px 12px', border: 'none', borderRadius: '4px' }}>Export Workout History (CSV)</button>
+          <div style={{ marginTop: 30, borderTop: '1px solid #444', paddingTop: 10 }}>
+            <h2>Workout History</h2>
+            <ul>
+              {completedWorkouts.map((entry, index) => (
+                <li key={index}>{entry.date} – {entry.program} – {entry.day}</li>
+              ))}
+            </ul>
+          </div>
         </div>
-      ))}
-
-      {timeLeft > 0 && (
-        <p style={{ textAlign: "center", color: "red" }}>Rest Timer: {timeLeft}s</p>
+      ) : (
+        <div>
+          <button onClick={() => setActiveScreen("home")} style={{ marginBottom: 10 }}>← Back to Programs</button>
+          <h1 style={{ textAlign: "center" }}>{programName}</h1>
+          <div style={{ marginBottom: 20 }}>
+            <label>Rest Timer (seconds): </label>
+            <input
+              type="number"
+              value={restTime}
+              onChange={(e) => setRestTime(Number(e.target.value))}
+              style={{ width: 60, backgroundColor: '#1e1e1e', color: '#f0f0f0', border: '1px solid #444' }}
+            />
+          </div>
+          {workouts.map((w, wi) => (
+            <div key={wi} style={{ marginBottom: 40 }}>
+              <h2>{w.day} – {w.focus}</h2>
+              {w.exercises.map((ex, ei) => {
+                const key = `${w.day}-${ex}`;
+                const lastWeight = recs[key] || "";
+                const chartData = (log[key] || []).map((entry, idx) => ({ session: idx + 1, weight: entry.weight }));
+                return (
+                  <div key={ei} style={{ marginBottom: 20, paddingLeft: 10 }}>
+                    <strong>{ex}</strong>
+                    <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
+                      <input id={`${key}-weight`} placeholder="Weight (lbs)" type="number" style={{ width: 100, backgroundColor: '#1e1e1e', color: '#f0f0f0', border: '1px solid #444' }} />
+                      <input id={`${key}-reps`} placeholder="Reps" type="number" style={{ width: 60 }} />
+                      <button onClick={() => {
+                        const wVal = document.getElementById(`${key}-weight`).value;
+                        const rVal = document.getElementById(`${key}-reps`).value;
+                        handleLog(w.day, ex, wVal, rVal);
+                      }}>Log Set</button>
+                    </div>
+                    {lastWeight && <p style={{ fontSize: "0.8em", color: "gray" }}>Suggested next weight: {lastWeight} lbs</p>}
+                    {chartData.length > 1 && (
+                      <ResponsiveContainer width="100%" height={150}>
+                        <LineChart data={chartData}>
+                          <XAxis dataKey="session" hide />
+                          <YAxis domain={['auto', 'auto']} width={30} />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="weight" stroke="#8884d8" strokeWidth={2} dot />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
+                );
+              })}
+              <button onClick={() => finishWorkout(w.day)} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '6px 12px', marginTop: 10, border: 'none', borderRadius: '4px' }}>Finish Workout</button>
+            </div>
+          ))}
+          {timeLeft > 0 && (
+            <p style={{ textAlign: "center", color: "red" }}>Rest Timer: {timeLeft}s</p>
+          )}
+        </div>
       )}
     </div>
   );
