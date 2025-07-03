@@ -162,3 +162,9 @@ export default function MobileWorkoutApp() {
 
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <label>Choose Day: </label>
+        <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+          {workouts.map(w => <option key={w.day} value={w.day}>{w.day}</option>)}
+        </select>
+      </div>
