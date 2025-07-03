@@ -1,8 +1,4 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const defaultWorkouts = [
@@ -63,10 +59,6 @@ const defaultWorkouts = [
   }
 ];
 
-const exerciseLibrary = [
-  // (same 100-exercise list as previously defined)
-];
-
 const useTimer = (initial = 60) => {
   const [timeLeft, setTimeLeft] = useState(0);
   useEffect(() => {
@@ -90,12 +82,8 @@ export default function MobileWorkoutApp() {
   const [recs, setRecs] = useState({});
   const [restTime, setRestTime] = useState(60);
   const [timeLeft, startTimer] = useTimer(restTime);
-  const [workouts, setWorkouts] = useState(() => {
-    const saved = localStorage.getItem("savedProgram");
-    return saved ? JSON.parse(saved) : defaultWorkouts;
-  });
+  const [workouts, setWorkouts] = useState(defaultWorkouts);
   const [searchTerm, setSearchTerm] = useState("");
-  const [programName, setProgramName] = useState("My Program");
 
   useEffect(() => {
     if (Notification.permission !== "granted") {
@@ -113,100 +101,59 @@ export default function MobileWorkoutApp() {
     startTimer(restTime);
   };
 
-  const addExercise = (day, ex) => {
-    const updated = workouts.map(w =>
-      w.day === day ? { ...w, exercises: [...w.exercises, ex] } : w
-    );
-    setWorkouts(updated);
-  };
-
-  const removeExercise = (day, ex) => {
-    const updated = workouts.map(w =>
-      w.day === day ? { ...w, exercises: w.exercises.filter(e => e !== ex) } : w
-    );
-    setWorkouts(updated);
-  };
-
-  const saveProgram = () => {
-    localStorage.setItem("savedProgram", JSON.stringify(workouts));
-    alert(`Saved program: ${programName}`);
-  };
-
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold text-center mb-2">Workout Builder</h1>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">Program Name:</label>
-          <Input value={programName} onChange={(e) => setProgramName(e.target.value)} className="w-48" />
-          <Button onClick={saveProgram}>Save Program</Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">Rest Timer (sec):</label>
-          <Input type="number" value={restTime} onChange={(e) => setRestTime(Number(e.target.value))} className="w-20" />
-        </div>
+    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
+      <h1 style={{ textAlign: "center" }}>Workout Tracker</h1>
+
+      <div style={{ marginBottom: 20 }}>
+        <label>Rest Timer (seconds): </label>
+        <input
+          type="number"
+          value={restTime}
+          onChange={(e) => setRestTime(Number(e.target.value))}
+          style={{ width: 60 }}
+        />
       </div>
-      <Tabs defaultValue="Monday" className="w-full">
-        <TabsList className="grid grid-cols-3 gap-1 mb-4 overflow-x-auto">
-          {workouts.map((w) => (
-            <TabsTrigger key={w.day} value={w.day}>{w.day}</TabsTrigger>
-          ))}
-        </TabsList>
-        {workouts.map((w) => (
-          <TabsContent key={w.day} value={w.day}>
-            <Card>
-              <CardContent className="space-y-4 p-4">
-                <h2 className="text-xl font-semibold">{w.focus}</h2>
-                {w.exercises.map((ex, i) => {
-                  const key = `${w.day}-${ex}`;
-                  const lastWeight = recs[key] || "";
-                  const chartData = (log[key] || []).map((entry, idx) => ({ session: idx + 1, weight: entry.weight }));
-                  return (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p className="font-medium">{ex}</p>
-                        <Button variant="destructive" onClick={() => removeExercise(w.day, ex)} size="sm">Remove</Button>
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder="Weight (lbs)" type="number" id={`${key}-weight`} />
-                        <Input placeholder="Reps" type="number" id={`${key}-reps`} />
-                        <Button onClick={() => {
-                          const wVal = document.getElementById(`${key}-weight`).value;
-                          const rVal = document.getElementById(`${key}-reps`).value;
-                          handleLog(w.day, ex, wVal, rVal);
-                        }}>Log Set</Button>
-                      </div>
-                      {lastWeight && <p className="text-sm text-gray-500">Suggested next weight: {lastWeight} lbs</p>}
-                      {chartData.length > 1 && (
-                        <ResponsiveContainer width="100%" height={150}>
-                          <LineChart data={chartData}>
-                            <XAxis dataKey="session" hide />
-                            <YAxis domain={['auto', 'auto']} width={30} />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="weight" stroke="#8884d8" strokeWidth={2} dot />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      )}
-                    </div>
-                  );
-                })}
-                <div className="mt-4">
-                  <Input placeholder="Search exercise to add..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                  <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto">
-                    {exerciseLibrary.filter(name => name.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 10).map((name, idx) => (
-                      <Button key={idx} onClick={() => addExercise(w.day, name)}>{name}</Button>
-                    ))}
-                  </div>
+
+      {workouts.map((w, wi) => (
+        <div key={wi} style={{ marginBottom: 40 }}>
+          <h2>{w.day} – {w.focus}</h2>
+          {w.exercises.map((ex, ei) => {
+            const key = `${w.day}-${ex}`;
+            const lastWeight = recs[key] || "";
+            const chartData = (log[key] || []).map((entry, idx) => ({ session: idx + 1, weight: entry.weight }));
+            return (
+              <div key={ei} style={{ marginBottom: 20, paddingLeft: 10 }}>
+                <strong>{ex}</strong>
+                <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
+                  <input id={`${key}-weight`} placeholder="Weight (lbs)" type="number" style={{ width: 100 }} />
+                  <input id={`${key}-reps`} placeholder="Reps" type="number" style={{ width: 60 }} />
+                  <button onClick={() => {
+                    const wVal = document.getElementById(`${key}-weight`).value;
+                    const rVal = document.getElementById(`${key}-reps`).value;
+                    handleLog(w.day, ex, wVal, rVal);
+                  }}>Log Set</button>
                 </div>
-                {timeLeft > 0 && (
-                  <p className="text-red-600 font-semibold text-center">Rest Timer: {timeLeft}s</p>
+                {lastWeight && <p style={{ fontSize: "0.8em", color: "gray" }}>Suggested next weight: {lastWeight} lbs</p>}
+                {chartData.length > 1 && (
+                  <ResponsiveContainer width="100%" height={150}>
+                    <LineChart data={chartData}>
+                      <XAxis dataKey="session" hide />
+                      <YAxis domain={['auto', 'auto']} width={30} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="weight" stroke="#8884d8" strokeWidth={2} dot />
+                    </LineChart>
+                  </ResponsiveContainer>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+
+      {timeLeft > 0 && (
+        <p style={{ textAlign: "center", color: "red" }}>Rest Timer: {timeLeft}s</p>
+      )}
     </div>
   );
 }
-
