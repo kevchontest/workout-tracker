@@ -106,7 +106,7 @@ export default function MobileWorkoutApp() {
     const saved = localStorage.getItem("completedWorkouts");
     return saved ? JSON.parse(saved) : [];
   });
-  const [activeScreen, setActiveScreen] = useState("home");
+  const [activeScreen, setActiveScreen] = useState(new Date().toLocaleString('en-US', { weekday: 'long' }));
 
   useEffect(() => {
     if (Notification.permission !== "granted") {
@@ -157,30 +157,15 @@ export default function MobileWorkoutApp() {
 
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif", backgroundColor: '#121212', color: '#f0f0f0', minHeight: '100vh' }}>
-      {activeScreen === "home" ? (
+      
         <div>
-          <h1 style={{ textAlign: "center", color: '#f0f0f0' }}>Workout Programs</h1>
-          <ul>
-            {Object.keys(savedPrograms).map((name) => (
-              <li key={name} style={{ marginBottom: 10, listStyle: 'none' }}>
-                <button onClick={() => loadProgram(name)} style={{ padding: 10, backgroundColor: '#333', color: '#f0f0f0', border: '1px solid #555' }}>{name}</button>
-              </li>
-            ))}
-          </ul>
-          <button onClick={exportWorkoutLog} style={{ marginTop: 20, backgroundColor: '#333', color: '#f0f0f0', padding: '8px 12px', border: 'none', borderRadius: '4px' }}>Export Workout History (CSV)</button>
-          <div style={{ marginTop: 30, borderTop: '1px solid #444', paddingTop: 10 }}>
-            <h2>Workout History</h2>
-            <ul>
-              {completedWorkouts.map((entry, index) => (
-                <li key={index}>{entry.date} – {entry.program} – {entry.day}</li>
-              ))}
-            </ul>
+                    <h1 style={{ textAlign: "center" }}>{selectedDay} Workout</h1>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <label>Choose Day: </label>
+            <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+              {workouts.map(w => <option key={w.day} value={w.day}>{w.day}</option>)}
+            </select>
           </div>
-        </div>
-      ) : (
-        <div>
-          <button onClick={() => setActiveScreen("home")} style={{ marginBottom: 10 }}>← Back to Programs</button>
-          <h1 style={{ textAlign: "center" }}>{programName}</h1>
           <div style={{ marginBottom: 20 }}>
             <label>Rest Timer (seconds): </label>
             <input
@@ -190,13 +175,9 @@ export default function MobileWorkoutApp() {
               style={{ width: 60, backgroundColor: '#1e1e1e', color: '#f0f0f0', border: '1px solid #444' }}
             />
           </div>
-          {workouts.map((w, wi) => (
-            <div key={wi} style={{ marginBottom: 40 }}>
-              <h2>{w.day} – {w.focus}</h2>
-              {w.exercises.map((ex, ei) => {
-                const key = `${w.day}-${ex}`;
-                const lastWeight = recs[key] || "";
-                const chartData = (log[key] || []).map((entry, idx) => ({ session: idx + 1, weight: entry.weight }));
+          const [selectedDay, setSelectedDay] = useState(new Date().toLocaleString('en-US', { weekday: 'long' }));
+const filteredWorkouts = workouts.filter(w => w.day === selectedDay);
+{filteredWorkouts.map((w, wi) => ( ... ));
                 return (
                   <div key={ei} style={{ marginBottom: 20, paddingLeft: 10 }}>
                     <strong>{ex}</strong>
