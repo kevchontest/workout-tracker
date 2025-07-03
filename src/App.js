@@ -76,8 +76,17 @@ const useTimer = (initial = 60) => {
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev === 1 && Notification.permission === "granted") {
-            new Notification("Rest timer complete! Ready for your next set.");
-          }
+            new Notification("Rest timer complete! Ready for your next set."      <div style={{ marginTop: 30 }}>
+        <button onClick={exportWorkoutLog} style={{ marginTop: 20, backgroundColor: '#333', color: '#f0f0f0', padding: '8px 12px', border: 'none', borderRadius: '4px' }}>Export Workout History (CSV)</button>
+        <h2>Workout History</h2>
+        <ul>
+          {completedWorkouts.map((entry, index) => (
+            <li key={index}>{entry.date} – {entry.program} – {entry.day}</li>
+          ))}
+        </ul>
+      </div>
+    );
+}
           return prev - 1;
         });
       }, 1000);
@@ -168,3 +177,42 @@ export default function MobileWorkoutApp() {
           {workouts.map(w => <option key={w.day} value={w.day}>{w.day}</option>)}
         </select>
       </div>
+      {filteredWorkouts.map((w, wi) => (
+        <div key={wi} style={{ marginBottom: 40 }}>
+          <h2>{w.day} – {w.focus}</h2>
+          {w.exercises.map((ex, ei) => {
+            const key = `${w.day}-${ex.name}`;
+            const lastWeight = recs[key] || "";
+            const chartData = (log[key] || []).map((entry, idx) => ({ session: idx + 1, weight: entry.weight }));
+            return (
+              <div key={ei} style={{ marginBottom: 20, paddingLeft: 10 }}>
+                <strong>{ex.name} ({ex.sets}×{ex.reps})</strong>
+                <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
+                  <input id={`${key}-weight`} placeholder="Weight (lbs)" type="number" style={{ width: 100 }} />
+                  <input id={`${key}-reps`} placeholder="Reps" type="number" style={{ width: 60 }} />
+                  <button onClick={() => {
+                    const wVal = document.getElementById(`${key}-weight`).value;
+                    const rVal = document.getElementById(`${key}-reps`).value;
+                    handleLog(w.day, ex.name, wVal, rVal);
+                  }}>Log Set</button>
+                </div>
+                {lastWeight && <p style={{ fontSize: "0.8em", color: "gray" }}>Suggested next weight: {lastWeight} lbs</p>}
+                {chartData.length > 1 && (
+                  <ResponsiveContainer width="100%" height={150}>
+                    <LineChart data={chartData}>
+                      <XAxis dataKey="session" hide />
+                      <YAxis domain={['auto', 'auto']} width={30} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="weight" stroke="#8884d8" strokeWidth={2} dot />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            );
+          })}
+          <button onClick={() => finishWorkout(w.day)} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '6px 12px', marginTop: 10, border: 'none', borderRadius: '4px' }}>Finish Workout</button>
+        </div>
+      ))}
+      {timeLeft > 0 && (
+        <p style={{ textAlign: "center", color: "red" }}>Rest Timer: {timeLeft}s</p>
+      )}
