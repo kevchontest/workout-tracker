@@ -106,7 +106,7 @@ export default function MobileWorkoutApp() {
     const saved = localStorage.getItem("completedWorkouts");
     return saved ? JSON.parse(saved) : [];
   });
-  const [activeScreen, setActiveScreen] = useState(new Date().toLocaleString('en-US', { weekday: 'long' }));
+  const [activeScreen, setActiveScreen] = useState("workout");
 
   useEffect(() => {
     if (Notification.permission !== "granted") {
