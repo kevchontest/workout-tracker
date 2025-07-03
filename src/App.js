@@ -6,12 +6,61 @@ import { Input } from "@/components/ui/input";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const defaultWorkouts = [
-  { day: "Monday", focus: "Upper Body Strength", exercises: ["Bench Press", "Barbell Row"] },
-  { day: "Tuesday", focus: "Lower Body Strength", exercises: ["Back Squat", "Romanian Deadlift"] },
-  { day: "Wednesday", focus: "Recovery / Mobility", exercises: ["Zone 2 walk/jog"] },
-  { day: "Thursday", focus: "Upper Hypertrophy", exercises: ["Incline Press", "EZ Curls"] },
-  { day: "Friday", focus: "Lower Hinge + Core", exercises: ["Deadlift", "Hanging Leg Raise"] },
-  { day: "Saturday", focus: "Murph Prep Conditioning", exercises: ["1 Mile Run"] }
+  {
+    day: "Monday",
+    focus: "Upper Body (Push/Pull)",
+    exercises: [
+      "Barbell Bench Press",
+      "Barbell Row",
+      "Superset: Overhead Press + Pull-Ups",
+      "Superset: Hammer Curls + Triceps Extensions"
+    ]
+  },
+  {
+    day: "Tuesday",
+    focus: "Lower Body (Squat Focus)",
+    exercises: [
+      "Barbell Back Squat",
+      "Romanian Deadlift",
+      "Superset: Bulgarian Split Squat + Planks"
+    ]
+  },
+  {
+    day: "Wednesday",
+    focus: "Recovery / Optional Cardio",
+    exercises: [
+      "30–45 min Zone 2 Treadmill Walk",
+      "Mobility/Yoga"
+    ]
+  },
+  {
+    day: "Thursday",
+    focus: "Upper Body (Hypertrophy/Volume)",
+    exercises: [
+      "Incline Press",
+      "Superset: DB Rows + Seated DB Press",
+      "Superset: Lateral Raises + Push-Ups",
+      "Superset: EZ Curls + Overhead Triceps"
+    ]
+  },
+  {
+    day: "Friday",
+    focus: "Lower Body (Hinge/Unilateral)",
+    exercises: [
+      "Deadlift",
+      "Front Squat",
+      "Superset: Step-Ups + Hanging Leg Raise"
+    ]
+  },
+  {
+    day: "Saturday",
+    focus: "Murph Prep Conditioning",
+    exercises: [
+      "1 Mile Run",
+      "10 Rounds: 5 Pull-Ups, 10 Push-Ups, 15 Air Squats",
+      "20-min EMOM: Pull-Ups, Push-Ups, Air Squats"
+    ]
+  }
 ];
 
 const exerciseLibrary = [
@@ -160,3 +209,4 @@ export default function MobileWorkoutApp() {
     </div>
   );
 }
+
